@@ -1,0 +1,51 @@
+---------------model---------------------
+188-400         (keyword)  site name
+test188-400     (keyword)  instance name
+1979            (int)      start year
+1988            (int)      end year
+3653            (int)      total days
+---------------job control------------------
+0 			 irestart        0: not a restart run  1: restart run
+1  			 soilcspin       0: no soil spinup, 1: acceleration procedure used 
+0 			 isimveg		 0: static veg, 1: dynamic veg, 2: dynamic veg-cold start
+0 			 isimfire        0: fixed fire, 1: dynam fire
+0 			 isimco2         0: fixed co2,  1: ramped co2
+0.000350     co2init		 initial co2 concentration in mol/mol (real)
+0.209000     o2init          initial o2 concentration in mol/mol (real)
+3600         dtime           time step in secondscc      read (lun,*) idiag
+41.875       lat
+10.95        sand0
+24.48        clay0
+1			 totnsoi_obs
+70			 cton_pro        ratio of carbon and nitrogen
+-----------------------------------------------------
+0.003		    clitlm
+0.03			clitls
+0.03            clitll
+0.001           clitrm 
+0.11            clitrs 
+0.06            clitrl 
+0.0005          clitwm
+0.8             clitws 
+0.7             clitwl
+0.3             totcmic 
+24              csoislop
+1.4             csoislon 
+2               csoipas 
+0.25            falll
+0.13            fallr 
+0.26            fallw 
+------------------vegetation------------------------------------
+9			    inveg
+0				exist1
+0               exist2
+0               exist3
+0               exist4
+1               exist5
+0               exist6
+0               exist7
+0               exist8
+0               exist9
+0               exist10
+0               exist11
+0               exist12
