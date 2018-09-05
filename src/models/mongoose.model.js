@@ -1,12 +1,11 @@
 const mongoose = require('mongoose');
-const setting = require('../config/setting');
+const setting = require('../setting');
 
 mongoose.Promise = global.Promise;
 const url = 'mongodb://' + setting.mongodb.host + ':' + setting.mongodb.port + '/' + setting.mongodb.name;
 
-mongoose.connect(url, {
-    useMongoClient: true
-});
+mongoose.connect(url);
+
 
 class MongooseBase {
     constructor(collName, schema) {

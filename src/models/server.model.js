@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const MongooseBase = require('./mongoose.model');
 
 const server = {
+    _id: '',
     name: '',
     group: [],
     startTime: '',
@@ -20,6 +21,7 @@ class ServerDB extends MongooseBase {
     constructor() {
         const collName = 'Server';
         const schema = {
+            _id: String,
             name: String,
             group: [String],
             startTime: String,

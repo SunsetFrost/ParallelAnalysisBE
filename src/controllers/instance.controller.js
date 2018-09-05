@@ -1,5 +1,19 @@
 const fetch = require('isomorphic-fetch');
 
+const instanceDB = require('../models/instance.model').instanceDB;
+
+async function getInstance(req, res, next) {
+    try {
+        const result = await instanceDB.find({});
+
+        res.locals.succeed = true;
+        res.locals.resData = result;
+        return next();
+    } catch(error) {
+
+    }
+}
+
 const mockInstance = () => {
     return [
         {
@@ -43,5 +57,6 @@ async function getTask(frameworkId, tasks) {
     return result;
 }
 
+module.exports.getInstance = getInstance;
 module.exports.getTask = getTask;
 module.exports.mockInstance = mockInstance;
