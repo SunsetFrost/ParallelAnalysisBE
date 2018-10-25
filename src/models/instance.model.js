@@ -6,8 +6,17 @@ const mongoose = require('mongoose');
 
 const MongooseBase = require('./mongoose.model');
 
+/* 
+    Instance Status
+    'INIT',
+    'COULD_START',
+    'START_PENDING',
+    'START_FAILED',
+    'RUNNING',
+    'FINISHED_FAILED',
+    'FINISHED_SUCCEED'
+*/
 const instance = {
-    _id: '',
     name: '',
     cpu: '',
     mem: '',
@@ -22,7 +31,6 @@ class InstanceDB extends MongooseBase {
     constructor() {
         const collName = 'Instance';
         const schema = {
-            _id: String,
             name: String,
             cpu: String,
             mem: String,

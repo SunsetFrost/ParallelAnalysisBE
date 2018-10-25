@@ -12,7 +12,6 @@ module.exports = class baseRouter {
             res.locals.resData = [{
                 href: req.originalUrl
             }];
-            res.locals.template = {};
             return next();
         });
         return router;

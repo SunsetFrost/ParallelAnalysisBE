@@ -44,4 +44,4 @@ app.use('/', router);
 postRouter(app);
 
 app.listen(setting.port);
-console.log('server is running \n \n');
+console.log(`\n server is running at ${setting.port} \n`);
