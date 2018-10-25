@@ -1,17 +1,15 @@
 const fetch = require('isomorphic-fetch');
 
 const instanceDB = require('../models/instance.model').instanceDB;
-const compareDB = require('../models/compare_instance.model');
+//const compareDB = require('../models/compare_instance.model');
 
-async function getInstance(req, res, next) {
+async function getInstance() {
     try {
         const result = await instanceDB.find({});
 
-        res.locals.succeed = true;
-        res.locals.resData = result;
-        return next();
+        return result;
     } catch(error) {
-
+        console.log(error);
     }
 }
 
@@ -35,16 +33,16 @@ async function createInstance(cmodelInstance) {
 } 
 
 async function updateInstanceOfCompare(taskId, state, progress) {
-    try {
-        compareDB.update({
-            _id: taskId
-        }, {
-            'state': state,
-            'progress': progress
-        })
-    } catch (error) {
-        console.log(error);
-    }
+    // try {
+    //     compareDB.update({
+    //         _id: taskId
+    //     }, {
+    //         'state': state,
+    //         'progress': progress
+    //     })
+    // } catch (error) {
+    //     console.log(error);
+    // }
 }
 
 module.exports.getInstance = getInstance;

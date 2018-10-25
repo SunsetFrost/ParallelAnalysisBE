@@ -3,19 +3,17 @@ const _ = require('lodash');
 const serverDB = require('../models/server.model').serverDB;
 
 //获取server
-async function getServer(req, res, next) {
+async function getServer() {
     try {
         const result = await serverDB.find({
-            'status': 'ready'
+            //'status': 'ready'
         });
     
-        res.locals.succeed = true;
-        res.locals.resData = result;
-        return next();
+        return result;
     } catch (error) {
-        const abc = '';
+        console.log(error);
+        return false;
     }
-
 }
 
 //更新server状态

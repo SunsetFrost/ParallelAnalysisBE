@@ -3,21 +3,17 @@ const fetch = require('isomorphic-fetch');
 const carbonModelDB = require('../models/carbon-model.model').carbonModelDB;
 const InstanceCtrl = require('../controllers/instance.controller');
 
-async function getCarbonModel(req, res, next) {
+async function getCarbonModel() {
     try {
-        const result = await carbonModelDB.find({});
-
-        res.local.succeed = true;
-        res.local.resData = result;
-        return next();
+        const result = await carbonModelDB.find();
+        return result;
     } catch(error) {
-
+        console.log(error);
     }
 }
 
-async function invokeCarbonModelByParallel(req, res, next) {
+async function invokeCarbonModelByParallel() {
     try {
-        const modelName = req.modelName;
         InstanceCtrl.createInstance(req.task);
         
         
@@ -27,9 +23,8 @@ async function invokeCarbonModelByParallel(req, res, next) {
     }
 }
 
-async function invokeCarbonModelBySingle(req, res, next) {
+async function invokeCarbonModelBySingle(reqInstance) {
     try {
-        const reqInstance = req.body.msInstance;
         const cmInstance = {
             type: 'compare'
         }
@@ -37,9 +32,7 @@ async function invokeCarbonModelBySingle(req, res, next) {
         InstanceCtrl.createInstance(cmInstance);
         InstanceCtrl.updateInstanceOfCompare("5bcff002473e4424ac000059", 'finish', 100);
 
-        return res.json({
-            code: 200
-        })
+
     } catch(error) {
         console.log(error);
         return false;

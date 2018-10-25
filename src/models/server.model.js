@@ -7,13 +7,13 @@ const mongoose = require('mongoose');
 const MongooseBase = require('./mongoose.model');
 
 const server = {
-    _id: '',
     name: '',
     group: [],
     startTime: '',
     status: '',
     ip: '',
     masterip: '',
+    type: '',
     desc: '',
 }
 
@@ -21,12 +21,13 @@ class ServerDB extends MongooseBase {
     constructor() {
         const collName = 'Server';
         const schema = {
-            _id: String,
             name: String,
             group: [String],
             startTime: String,
+            status: String,
             ip: String,
             masterip: String,
+            type: String,
             desc: String,
         }
 
