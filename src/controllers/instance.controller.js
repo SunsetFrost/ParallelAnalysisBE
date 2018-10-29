@@ -1,4 +1,9 @@
 const fetch = require('isomorphic-fetch');
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
+const process = require('process')
+
+const setting = require('../setting');
 
 const instanceDB = require('../models/instance.model').instanceDB;
 //const compareDB = require('../models/compare_instance.model');
@@ -13,7 +18,7 @@ async function getInstance() {
     }
 }
 
-async function createInstance(cmodelInstance) {
+async function createInstanceFromCmp(cmodelInstance) {
     const newInstance = {
         //...cmodelInstance,
         name: 'ParallelCompareTask' + Math.floor(Math.random() * Math.floor(100)),
@@ -32,19 +37,39 @@ async function createInstance(cmodelInstance) {
     }
 } 
 
+async function createInstanceFromPara(task) {
+    const newInstance = {
+        ...task,
+        numTasks: null,
+        server: null,
+        status: null  
+    };
+    try {
+        const msg = await instanceDB.insert(newInstance);
+        return msg;
+    } catch (error) {
+        console.log(error);
+        return false;
+    } 
+}
+
 async function updateInstanceOfCompare(taskId, state, progress) {
-    // try {
-    //     compareDB.update({
-    //         _id: taskId
-    //     }, {
-    //         'state': state,
-    //         'progress': progress
-    //     })
-    // } catch (error) {
-    //     console.log(error);
-    // }
+    const mongoUrl = `mongodb://${setting.compare_db.ip}:${setting.compare_db.port} ${setting.compare_db.name} Calcu_Task`;
+    const invokePython = `python compareInstanceHelper.py ${taskId}  ${state} ${progress} ${mongoUrl}`;
+    //config python directory
+    const pDir = process.cwd() + '\\src\\tools';
+    const options = {
+        cwd: pDir,
+    }
+    try {
+        await exec(invokePython, options);    
+    } catch (error) {
+        console.log(error);
+        return('update compare status error');
+    }
 }
 
 module.exports.getInstance = getInstance;
-module.exports.createInstance = createInstance;
+module.exports.createInstanceFromCmp = createInstanceFromCmp;
+module.exports.createInstanceFromPara = createInstanceFromPara;
 module.exports.updateInstanceOfCompare = updateInstanceOfCompare;

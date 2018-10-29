@@ -10,6 +10,19 @@ router.route('/')
             code: 200,
             data: data
         })
+    })
+    .post(async (req, res, next) => {
+        if(req.body.task) {
+            const instanceId = await InstanceCtrl.createInstanceFromPara(req.body.task);
+            return res.json({
+                code: 200,
+                data: {
+                    _id: instanceId
+                }
+            })
+        } else {
+            return next(new Error('invalid request body!'));
+        }
     });
 
 module.exports = router;

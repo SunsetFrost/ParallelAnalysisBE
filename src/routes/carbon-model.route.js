@@ -14,7 +14,7 @@ router.route('/')
 router.route('/invoke')
     .post(async (req, res, next) => {
         const reqInstance = req.body.msInstance;
-
+        await CarbonModelCtrl.invokeCarbonModelBySingle(reqInstance);
         return res.json({
             code: 200
         })

@@ -16,15 +16,51 @@ const MongooseBase = require('./mongoose.model');
     'FINISHED_FAILED',
     'FINISHED_SUCCEED'
 */
+// const instance = {
+//     name: '',
+//     cpu: '',
+//     mem: '',
+//     startTime: '',
+//     status: '',
+//     sites: [],
+//     completeNum: '',
+//     totalNum: ''
+// }
 const instance = {
     name: '',
-    cpu: '',
-    mem: '',
-    startTime: '',
-    status: '',
-    sites: [],
-    completeNum: '',
-    totalNum: ''
+    models: [],
+    user: '',
+    time: {
+        start: '',
+        end: '',
+        duration: ''
+    },
+    numTasks: {
+        total: -1,
+        active: -1,
+        completed: -1,
+        failed: -1 
+    },
+    server: [
+        {
+            id: '',
+            name: '',
+            hostport: '',
+            resource: {
+                cpu: '',
+                memory: '',
+                disk: '',
+                maxMemory: ''
+            },
+            task: {
+                total: -1,
+                active: -1,
+                complete: -1,
+                failed: -1
+            }
+        }
+    ],
+    status: '' 
 }
 
 class InstanceDB extends MongooseBase {
@@ -32,13 +68,12 @@ class InstanceDB extends MongooseBase {
         const collName = 'Instance';
         const schema = {
             name: String,
-            cpu: String,
-            mem: String,
-            startTime: String,
-            status: String,
-            sites: [String],
-            completeNum: String,
-            totalNum: String
+            models: [String],
+            user: String,
+            time: mongoose.Schema.Types.Mixed,
+            numTasks: mongoose.Schema.Types.Mixed,
+            server: mongoose.Schema.Types.Mixed,
+            status: String
         }
 
         super(collName, schema);
