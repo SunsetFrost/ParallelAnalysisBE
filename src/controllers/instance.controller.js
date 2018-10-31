@@ -4,7 +4,6 @@ const exec = util.promisify(require('child_process').exec);
 const process = require('process')
 
 const setting = require('../setting');
-
 const instanceDB = require('../models/instance.model').instanceDB;
 //const compareDB = require('../models/compare_instance.model');
 

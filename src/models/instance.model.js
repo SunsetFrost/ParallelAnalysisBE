@@ -1,9 +1,4 @@
-const util = require('util');
-const fs = require('fs');
-
-const _ = require('lodash');
 const mongoose = require('mongoose');
-
 const MongooseBase = require('./mongoose.model');
 
 /* 
@@ -16,16 +11,7 @@ const MongooseBase = require('./mongoose.model');
     'FINISHED_FAILED',
     'FINISHED_SUCCEED'
 */
-// const instance = {
-//     name: '',
-//     cpu: '',
-//     mem: '',
-//     startTime: '',
-//     status: '',
-//     sites: [],
-//     completeNum: '',
-//     totalNum: ''
-// }
+
 const instance = {
     name: '',
     models: [],

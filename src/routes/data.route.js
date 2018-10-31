@@ -3,6 +3,15 @@ const DataCtrl = require('../controllers/data.controller');
 
 const router = new baseRouter();
 
+router.route('/')
+    .get(async (req, res, next) => {
+        const data = await DataCtrl.getData();
+        return res.json({
+            code: 200,
+            data: data
+        })
+    });
+
 router.route('/download')
     .get(async (req, res, next) => {
         const msrId = req.query.msrId;

@@ -1,6 +1,17 @@
 const fs = require('fs');
 
 const setting = require('../setting');
+const dataDB = require('../models/data.model').dataDB;
+
+async function getData() {
+    try {
+        const msg = await dataDB.find({});
+        return msg;
+    } catch(error) {
+        console.log(error);
+        return false;
+    }
+}
 
 async function download(msrId, eventId) {
     try {
@@ -17,9 +28,7 @@ async function download(msrId, eventId) {
         console.log(error);
         return false;
     }
-
-
-
 }
 
+module.exports.getData = getData;
 module.exports.download = download;
