@@ -1,8 +1,8 @@
 const fetch = require('isomorphic-fetch');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
-const process = require('process')
-
+const process = require('process');
+const moment = require('moment');
 const setting = require('../setting');
 const instanceDB = require('../models/instance.model').instanceDB;
 //const compareDB = require('../models/compare_instance.model');
@@ -36,13 +36,40 @@ async function createInstanceFromCmp(cmodelInstance) {
     }
 } 
 
-async function createInstanceFromPara(task) {
-    const newInstance = {
-        ...task,
-        numTasks: null,
-        server: null,
-        status: null  
+function transformTask(task) {
+    const site2array = (siteStart, siteEnd) => {
+        let array = [];
+        for(let i = siteStart; i <= siteEnd; i++) {
+            array.push(i);
+        }
+        return array;
     };
+
+    return {
+        name: task.name,
+        modelCfg: {
+            models: [task.model],
+            time: {
+                start: moment(task.time[0], 'YYYY/MM/DD'),
+                end: moment(task.time[1], 'YYYY/MM/DD'),
+            },
+            sites: site2array(task.siteStart, task.siteEnd),
+        },
+        parallCfg: {
+            mode: task.mode,
+            cpuCfg: task.cpu,
+            memCfg: task.mem,
+        },
+        time: {
+            start: task.createTime,
+        },
+        user: task.user.name,
+        status: 'INIT',
+    }
+}
+
+async function createInstanceFromPara(task) {
+    const newInstance = transformTask(task);
     try {
         const msg = await instanceDB.insert(newInstance);
         return msg;

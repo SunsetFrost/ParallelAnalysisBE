@@ -16,20 +16,26 @@ function preMid(app) {
 
     // all cross origin
     app.all('*', (req, res, next) => {
-        // TODO 为防止CSRF攻击，应设置为前端所在的域名
-        res.header('Access-Control-Allow-Origin', 'http://localhost:9035');
-        res.header(
-            'Access-Control-Allow-Headers',
-            'Content-Type,Content-Length, Authorization, Accept,X-Requested-With'
-        );
-        res.header(
-            'Access-Control-Allow-Methods',
-            'PUT,POST,GET,DELETE,OPTIONS'
-        );
-        res.header(
-            'Access-Control-Allow-Credentials',
-            'true'
-        )
+        const allowOrign = [
+            'http://localhost:9035',
+            'http://localhost:8000',
+        ];
+        if(allowOrign.includes(req.headers.origin)) {
+            res.header('Access-Control-Allow-Origin', req.headers.origin);
+            res.header(
+                'Access-Control-Allow-Headers',
+                'Content-Type,Content-Length, Authorization, Accept,X-Requested-With'
+            );
+            res.header(
+                'Access-Control-Allow-Methods',
+                'PUT,POST,GET,DELETE,OPTIONS'
+            );
+            res.header(
+                'Access-Control-Allow-Credentials',
+                'true'
+            )
+        }
+
         if (req.method == 'OPTIONS') {
             // 预检请求直接返回
             return res.send(200);

@@ -4,8 +4,7 @@ const MongooseBase = require('./mongoose.model');
 /* 
     Instance Status
     'INIT',
-    'COULD_START',
-    'START_PENDING',
+    'START_PENDING',  从服务器创建 到spark任务创建成功之间
     'START_FAILED',
     'RUNNING',
     'FINISHED_FAILED',
@@ -14,8 +13,31 @@ const MongooseBase = require('./mongoose.model');
 
 const instance = {
     name: '',
-    models: [],
-    user: '',
+    modelCfg: {
+        models: [
+            '',
+        ],
+        time: {
+            start: '',
+            end: '',
+        },
+        sites: [
+            '',
+        ],
+        data: '',
+        parms: '',
+    },
+    parallCfg: {
+        mode: '', // standalone cluster
+        server: [
+            '',
+        ],
+        cpuCfg: '',// fix  max min 
+        memCfg: '',
+        advanceCfg: {
+            // TODO  custom every server config
+        },
+    },
     time: {
         start: '',
         end: '',
@@ -46,6 +68,7 @@ const instance = {
             }
         }
     ],
+    user: '',
     status: '' 
 }
 
@@ -54,11 +77,12 @@ class InstanceDB extends MongooseBase {
         const collName = 'Instance';
         const schema = {
             name: String,
-            models: [String],
-            user: String,
+            modelCfg: mongoose.Schema.Types.Mixed,
+            parallCfg: mongoose.Schema.Types.Mixed,
             time: mongoose.Schema.Types.Mixed,
             numTasks: mongoose.Schema.Types.Mixed,
             server: mongoose.Schema.Types.Mixed,
+            user: String,
             status: String
         }
 
