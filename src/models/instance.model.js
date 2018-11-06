@@ -92,3 +92,4 @@ class InstanceDB extends MongooseBase {
 
 const instanceDB = new InstanceDB();
 module.exports.instanceDB = instanceDB;
+module.exports.init = instance;

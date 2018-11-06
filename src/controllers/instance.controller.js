@@ -7,6 +7,7 @@ const moment = require('moment');
 const { ObjectID } = require('mongodb');
 const setting = require('../setting');
 const instanceDB = require('../models/instance.model').instanceDB;
+const instanceInit = require('../models/instance.model').init;
 const SparkCtrl = require('./spark.controller');
 
 async function getInstance() {
@@ -59,6 +60,7 @@ function transformTask(task) {
     };
 
     return {
+        ...instanceInit,
         name: task.name,
         modelCfg: {
             models: [task.model],
@@ -125,6 +127,9 @@ exports.updateInstnaceStatus = async (insId, status) => {
     }
 }
 
+/* 
+ * 轮询 从spark ctrl获取对应instance进度 并 更新数据库
+ */
 exports.startInstance = async (insId) => {
     try {
         const ins = await getInstanceById(insId);
@@ -140,8 +145,27 @@ exports.startInstance = async (insId) => {
             if(completeNum >= sparkConf.totalNum) {
                 isFinished = true;
             }
-            await setTimeoutPromise(2000, completeNum, sparkConf.totalNum).then((complete, total) => {
-                console.log(`model is running, progress is ${completeNum} of ${sparkConf.totalNum}`);
+            await setTimeoutPromise(3000, completeNum, sparkConf.totalNum).then(async (complete, total) => {
+                //console.log(`model is running, progress is ${completeNum} of ${sparkConf.totalNum}`);
+                if(completeNum != complete) {
+                    const num = {
+                        total: total,
+                        active: 0,
+                        completed: completeNum,
+                        failed: 0
+                    }
+                    console.log(num.completed);
+
+                    const where = {
+                        _id: ObjectID(ins._id)
+                    }
+                    const update = {
+                        $set: {
+                            numTasks: num 
+                        }
+                    }
+                    const msg = await instanceDB.update(where, update);
+                }
             })
         }
     } catch (error) {
@@ -149,6 +173,19 @@ exports.startInstance = async (insId) => {
         return false;
     }
 
+}
+
+/* 
+ * socket轮询 传递instanc进度 
+ * 获取所有状态为running的instance的id与进度
+ * params { socket }
+ */
+exports.emitInstanceProgress = async (socket) => {
+    // for(let i = 0; i < 100; i++) {
+    //     socket.emit('INSTANCE_PROG', `server emit ${i}`);
+
+    //     await setTimeoutPromise(3000);
+    // }
 }
 
 module.exports.getInstance = getInstance;

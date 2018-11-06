@@ -1,6 +1,8 @@
 const express = require('express');
 const proxy = require('http-proxy-middleware');
 const app = express();
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 
 const router = require('./routes/index.route');
 const preRouter = require('./middlewares/pre-request.middleware');
@@ -41,7 +43,17 @@ preRouter(app);
 
 app.use('/', router);
 
+io.on('connection', (socket) => {
+    console.log('client connected');
+    InstanceCtl.emitInstanceProgress(socket);
+
+    socket.on('disconnect', () => {
+        console.log('client io disconnect');
+    });
+})
+
 postRouter(app);
 
-app.listen(setting.port);
-console.log(`\n server is running at ${setting.port} \n`);
+http.listen(setting.port, () => {
+    console.log(`\n server is running at ${setting.port} \n`);
+});
