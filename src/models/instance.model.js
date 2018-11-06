@@ -4,7 +4,7 @@ const MongooseBase = require('./mongoose.model');
 /* 
     Instance Status
     'INIT',
-    'START_PENDING',  从服务器创建 到spark任务创建成功之间
+    'START_PENDING',  从开始计算 到spark任务创建成功之间
     'START_FAILED',
     'RUNNING',
     'FINISHED_FAILED',

@@ -1,11 +1,13 @@
 const fetch = require('isomorphic-fetch');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
+const setTimeoutPromise = util.promisify(require('timers').setTimeout);
 const process = require('process');
 const moment = require('moment');
+const { ObjectID } = require('mongodb');
 const setting = require('../setting');
 const instanceDB = require('../models/instance.model').instanceDB;
-//const compareDB = require('../models/compare_instance.model');
+const SparkCtrl = require('./spark.controller');
 
 async function getInstance() {
     try {
@@ -14,6 +16,17 @@ async function getInstance() {
         return result;
     } catch(error) {
         console.log(error);
+    }
+}
+
+async function getInstanceById(insId) {
+    try {
+        const where = { _id: ObjectID(insId) };
+        const res = await instanceDB.find(where);
+        return res[0];
+    } catch (error) {
+        console.log(error);
+        return false;
     }
 }
 
@@ -74,7 +87,7 @@ async function createInstanceFromPara(task) {
         const msg = await instanceDB.insert(newInstance);
         return msg;
     } catch (error) {
-        console.log(error);
+        console.log(error); 
         return false;
     } 
 }
@@ -95,7 +108,51 @@ async function updateInstanceOfCompare(taskId, state, progress) {
     }
 }
 
+exports.updateInstnaceStatus = async (insId, status) => {
+    try {
+        const where = {
+            _id: ObjectID(insId)
+        }
+        const update = {
+            $set: {
+                status: status
+            }
+        }
+        const msg = await instanceDB.update(where, update);
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
+exports.startInstance = async (insId) => {
+    try {
+        const ins = await getInstanceById(insId);
+        //mock spark config data
+        const sparkConf = {
+            totalNum: 100,
+            speed: 1
+        };
+
+        let isFinished = false; 
+        while(!isFinished) {
+            const completeNum = await SparkCtrl.mockSpark(ins.time.start, Date.now(), sparkConf.totalNum, sparkConf.speed);        
+            if(completeNum >= sparkConf.totalNum) {
+                isFinished = true;
+            }
+            await setTimeoutPromise(2000, completeNum, sparkConf.totalNum).then((complete, total) => {
+                console.log(`model is running, progress is ${completeNum} of ${sparkConf.totalNum}`);
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+
+}
+
 module.exports.getInstance = getInstance;
+module.exports.getInstanceById = getInstanceById;
 module.exports.createInstanceFromCmp = createInstanceFromCmp;
 module.exports.createInstanceFromPara = createInstanceFromPara;
 module.exports.updateInstanceOfCompare = updateInstanceOfCompare;

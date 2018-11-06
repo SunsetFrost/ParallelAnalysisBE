@@ -12,17 +12,10 @@ async function getCarbonModel() {
     }
 }
 
-async function invokeCarbonModelByParallel() {
-    try {
-        InstanceCtrl.createInstance(req.task);
-        
-        
-        
-    } catch(error) {
-         
-    }
-}
-
+/* 
+ * 比较平台计算任务 
+ * 调用并行计算
+ */
 async function invokeCarbonModelBySingle(reqInstance) {
     try {
         const cmInstance = {
@@ -49,5 +42,4 @@ function invokeByCmd(modelName) {
 }
 
 module.exports.getCarbonModel = getCarbonModel;
-module.exports.invokeCarbonModelByParallel = invokeCarbonModelByParallel;
 module.exports.invokeCarbonModelBySingle = invokeCarbonModelBySingle;

@@ -25,4 +25,12 @@ router.route('/')
         }
     });
 
+router.route('/invoke')
+    .get(async (req, res, next) => {
+        const insId = req.query.instanceId;
+        await InstanceCtrl.updateInstnaceStatus(insId, 'RUNNING');
+
+        InstanceCtrl.startInstance(insId);
+    })
+
 module.exports = router;
