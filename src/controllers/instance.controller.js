@@ -110,7 +110,7 @@ async function updateInstanceOfCompare(taskId, state, progress) {
     }
 }
 
-exports.updateInstnaceStatus = async (insId, status) => {
+async function updateInstnaceStatus(insId, status) {
     try {
         const where = {
             _id: ObjectID(insId)
@@ -133,46 +133,63 @@ exports.updateInstnaceStatus = async (insId, status) => {
 exports.startInstance = async (insId) => {
     try {
         const ins = await getInstanceById(insId);
-        //mock spark config data
+
+        // change status to start_pending
+        updateInstnaceStatus(insId, 'START_PENDING');
+        await setTimeoutPromise(4000);
+
+        // mock spark config data
         const sparkConf = {
             totalNum: 100,
             speed: 1
         };
 
+        // polling spark running progress
         let isFinished = false; 
         while(!isFinished) {
-            const completeNum = await SparkCtrl.mockSpark(ins.time.start, Date.now(), sparkConf.totalNum, sparkConf.speed);        
-            if(completeNum >= sparkConf.totalNum) {
-                isFinished = true;
-            }
-            await setTimeoutPromise(3000, completeNum, sparkConf.totalNum).then(async (complete, total) => {
-                //console.log(`model is running, progress is ${completeNum} of ${sparkConf.totalNum}`);
-                if(completeNum != complete) {
-                    const num = {
-                        total: total,
-                        active: 0,
-                        completed: completeNum,
-                        failed: 0
-                    }
-                    console.log(num.completed);
+            const completeNum = await SparkCtrl.mockSpark(ins.time.start, Date.now(), sparkConf.totalNum, sparkConf.speed);  
 
-                    const where = {
-                        _id: ObjectID(ins._id)
-                    }
-                    const update = {
-                        $set: {
-                            numTasks: num 
-                        }
-                    }
-                    const msg = await instanceDB.update(where, update);
+            const num = {
+                total: sparkConf.totalNum,
+                active: 0,
+                completed: completeNum,
+                failed: 0
+            }
+
+            if(completeNum > 0 && completeNum < num.total) {
+                //update db
+                const where = {
+                    _id: ObjectID(ins._id)
                 }
-            })
+                const update = {
+                    $set: {
+                        numTasks: num,
+                        status: 'RUNNING'
+                    }
+                }
+                const msg = await instanceDB.update(where, update);
+            }
+            if(completeNum >= num.total) {
+                isFinished = true;
+                //update db
+                const where = {
+                    _id: ObjectID(ins._id)
+                }
+                const update = {
+                    $set: {
+                        numTasks: num,
+                        status: 'FINISHED_SUCCEED'
+                    }
+                }
+                const msg = await instanceDB.update(where, update);
+            }
+
+            await setTimeoutPromise(2000);
         }
     } catch (error) {
-        console.log(error);
+        console.log(`start instance error! msg:${error}`);
         return false;
     }
-
 }
 
 /* 
@@ -181,11 +198,19 @@ exports.startInstance = async (insId) => {
  * params { socket }
  */
 exports.emitInstanceProgress = async (socket) => {
-    // for(let i = 0; i < 100; i++) {
-    //     socket.emit('INSTANCE_PROG', `server emit ${i}`);
-
-    //     await setTimeoutPromise(3000);
-    // }
+    let isRunning = true;
+    while(isRunning) {
+        const instance = await getInstance();
+        // const progress = instance.map((item) => {
+        //     return {
+        //         id: item.id,
+        //         progress: item.numTasks,
+        //         status: item.status,
+        //     }
+        // })
+        socket.emit('INSTANCE_PROG', instance);
+        await setTimeoutPromise(3000);
+    }
 }
 
 module.exports.getInstance = getInstance;
@@ -193,3 +218,4 @@ module.exports.getInstanceById = getInstanceById;
 module.exports.createInstanceFromCmp = createInstanceFromCmp;
 module.exports.createInstanceFromPara = createInstanceFromPara;
 module.exports.updateInstanceOfCompare = updateInstanceOfCompare;
+module.exports.updateInstnaceStatus = updateInstnaceStatus;
