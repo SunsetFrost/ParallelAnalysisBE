@@ -6,13 +6,36 @@ const data = {
     io: '',//input output
     instance: '',
     meta: {
-        temporal: '',
-        spatial: '',
+        temporal: {
+            value: -1,
+            unit: '',
+            start: '',
+            end: '',
+        },
+        spatial: {
+            lat: {
+                resolution: 0.5,
+                start: -1,
+                end: -1,
+            },
+            lon: {
+                resolution: 0.667,
+                start: -1,
+                end: -1,
+            },
+        },
     },
     content: {
         type: '',// file mongodb hdfs
         format: '', // site netcdf
-        sites: [],
+        sites: [
+            {
+                name: '',
+                lat: -1,
+                lon: -1,
+                path: ''
+            }
+        ],
     },
     desc: '',
 };

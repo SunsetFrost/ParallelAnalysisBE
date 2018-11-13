@@ -141,20 +141,74 @@ exports.startInstance = async (insId) => {
         // mock spark config data
         const sparkConf = {
             totalNum: 100,
-            speed: 1
+            speed: 0.3
         };
 
         // polling spark running progress
         let isFinished = false; 
         while(!isFinished) {
-            const completeNum = await SparkCtrl.mockSpark(ins.time.start, Date.now(), sparkConf.totalNum, sparkConf.speed);  
+            const completeNum = SparkCtrl.mockSpark(ins.time.start, Date.now(), sparkConf.totalNum, sparkConf.speed);  
 
             const num = {
                 total: sparkConf.totalNum,
                 active: 0,
                 completed: completeNum,
                 failed: 0
-            }
+            };
+
+            const server = [
+                {
+                    id: '1',
+                    name: 'OGMS_ubuntu_slave1',
+                    hostport: '172.21.212.122',
+                    resource: {
+                        cpu: '2',
+                        memory: '345Mb',
+                        disk: '',
+                        maxMemory: ''
+                    },
+                    task: {
+                        total: 50,
+                        active: 1,
+                        complete: SparkCtrl.mockSpark(ins.time.start, Date.now(), 50, 1),
+                        failed: 0
+                    }
+                },
+                {
+                    id: '2',
+                    name: 'OGMS_ubuntu_slave2',
+                    hostport: '172.21.213.117',
+                    resource: {
+                        cpu: '2',
+                        memory: '345Mb',
+                        disk: '',
+                        maxMemory: ''
+                    },
+                    task: {
+                        total: 20,
+                        active: 1,
+                        complete: SparkCtrl.mockSpark(ins.time.start, Date.now(), 20, 0.5),
+                        failed: 0
+                    }
+                },
+                {
+                    id: '3',
+                    name: 'OGMS_ubuntu_slave3',
+                    hostport: '172.21.212.246',
+                    resource: {
+                        cpu: '2',
+                        memory: '345Mb',
+                        disk: '',
+                        maxMemory: ''
+                    },
+                    task: {
+                        total: 30,
+                        active: 1,
+                        complete: SparkCtrl.mockSpark(ins.time.start, Date.now(), 30, 0.5),
+                        failed: 0
+                    }
+                },
+            ];
 
             if(completeNum > 0 && completeNum < num.total) {
                 //update db
@@ -164,6 +218,7 @@ exports.startInstance = async (insId) => {
                 const update = {
                     $set: {
                         numTasks: num,
+                        server: server,
                         status: 'RUNNING'
                     }
                 }
@@ -178,6 +233,7 @@ exports.startInstance = async (insId) => {
                 const update = {
                     $set: {
                         numTasks: num,
+                        server: server,
                         status: 'FINISHED_SUCCEED'
                     }
                 }
@@ -197,7 +253,7 @@ exports.startInstance = async (insId) => {
  * 获取所有状态为running的instance的id与进度
  * params { socket }
  */
-exports.emitInstanceProgress = async (socket) => {
+exports.emitInstance = async (socket) => {
     let isRunning = true;
     while(isRunning) {
         const instance = await getInstance();
