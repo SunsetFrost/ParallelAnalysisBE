@@ -3,6 +3,7 @@ const ServerRouter = require('./server.route');
 const InstanceRouter = require('./instance.route');
 const CarbonModelRouter = require('./carbon-model.route');
 const DataRouter = require('./data.route');
+const LogRouter = require('./log.route');
 
 const router = new baseRouter();
 
@@ -10,6 +11,7 @@ router.use('/server', ServerRouter);
 router.use('/instance', InstanceRouter);
 router.use('/services', CarbonModelRouter);
 router.use('/data', DataRouter);
+router.use('/log', LogRouter);
 
 router.route('/')
     .get((req, res, next) => {
