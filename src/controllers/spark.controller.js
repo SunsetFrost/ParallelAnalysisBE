@@ -7,9 +7,10 @@ const moment = require('moment');
             speed }
  * @return { completeNum }
  */
-exports.mockSpark = (startTime, currentTime, totalNum, speed) => {
+exports.mockSpark = (startTime, currentTime, totalNum, cpu) => {
     const diff = Math.abs(moment(startTime).diff(moment(currentTime), 'seconds'));
-    const completeNum = Math.floor(diff * speed);
+    const speed = 60 / cpu;  
+    const completeNum = Math.floor(diff / speed);
     if(completeNum <= totalNum) {
         return completeNum;
     } else {

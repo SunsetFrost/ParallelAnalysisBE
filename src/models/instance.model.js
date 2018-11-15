@@ -39,9 +39,9 @@ const instance = {
         },
     },
     time: {
+        create: '',
         start: '',
         end: '',
-        duration: ''
     },
     numTasks: {
         total: -1,

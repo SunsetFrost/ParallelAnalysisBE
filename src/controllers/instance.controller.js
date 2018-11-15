@@ -7,7 +7,6 @@ const moment = require('moment');
 const { ObjectID } = require('mongodb');
 const setting = require('../setting');
 const instanceDB = require('../models/instance.model').instanceDB;
-const instanceInit = require('../models/instance.model').init;
 const SparkCtrl = require('./spark.controller');
 
 async function getInstance() {
@@ -53,14 +52,13 @@ async function createInstanceFromCmp(cmodelInstance) {
 function transformTask(task) {
     const site2array = (siteStart, siteEnd) => {
         let array = [];
-        for(let i = siteStart; i <= siteEnd; i++) {
+        for(let i = Number(siteStart); i <= Number(siteEnd); i++) {
             array.push(i);
         }
         return array;
     };
 
     return {
-        ...instanceInit,
         name: task.name,
         modelCfg: {
             models: [task.model],
@@ -75,8 +73,15 @@ function transformTask(task) {
             cpuCfg: task.cpu,
             memCfg: task.mem,
         },
+        server: [],
+        numTasks: {
+            total: -1,
+            active: -1,
+            completed: -1,
+            failed: -1 
+        },
         time: {
-            start: task.createTime,
+             create: task.createTime,
         },
         user: task.user.name,
         status: 'INIT',
@@ -136,115 +141,154 @@ exports.startInstance = async (insId) => {
 
         // change status to start_pending
         updateInstnaceStatus(insId, 'START_PENDING');
-        await setTimeoutPromise(4000);
 
-        // mock spark config data
-        const sparkConf = {
-            totalNum: 100,
-            speed: 0.3
+        //mock submit intance to spark 
+        await setTimeoutPromise(4000); //判端spark状态 并获取成功后的任务分配信息
+        const numTasks = {
+            total: ins.modelCfg.sites.length,
+            active: 0,
+            completed: 0,
+            failed: 0
         };
 
-        // polling spark running progress
-        let isFinished = false; 
-        while(!isFinished) {
-            const completeNum = SparkCtrl.mockSpark(ins.time.start, Date.now(), sparkConf.totalNum, sparkConf.speed);  
-
-            const num = {
-                total: sparkConf.totalNum,
-                active: 0,
-                completed: completeNum,
-                failed: 0
-            };
-
-            const server = [
-                {
-                    id: '1',
-                    name: 'OGMS_ubuntu_slave1',
-                    hostport: '172.21.212.122',
-                    resource: {
-                        cpu: '2',
-                        memory: '345Mb',
-                        disk: '',
-                        maxMemory: ''
-                    },
-                    task: {
-                        total: 50,
-                        active: 1,
-                        complete: SparkCtrl.mockSpark(ins.time.start, Date.now(), 50, 1),
-                        failed: 0
-                    }
+        const server = [
+            {
+                id: '1',
+                name: 'OGMS_ubuntu_slave1',
+                hostport: '172.21.212.122',
+                resource: {
+                    cpu: (2 + (Math.random() * 0.5)).toFixed(1),
+                    memory: '345Mb',
+                    disk: '',
+                    maxMemory: ''
                 },
-                {
-                    id: '2',
-                    name: 'OGMS_ubuntu_slave2',
-                    hostport: '172.21.213.117',
-                    resource: {
-                        cpu: '2',
-                        memory: '345Mb',
-                        disk: '',
-                        maxMemory: ''
-                    },
-                    task: {
-                        total: 20,
-                        active: 1,
-                        complete: SparkCtrl.mockSpark(ins.time.start, Date.now(), 20, 0.5),
-                        failed: 0
-                    }
+                task: {
+                    total: Math.round(numTasks.total * 0.5),
+                    active: 1,
+                    complete: 0,
+                    failed: 0
+                }
+            },
+            {
+                id: '2',
+                name: 'OGMS_ubuntu_slave2',
+                hostport: '172.21.213.117',
+                resource: {
+                    cpu: (1 + (Math.random() * 0.5)).toFixed(1),
+                    memory: '345Mb',
+                    disk: '',
+                    maxMemory: ''
                 },
-                {
-                    id: '3',
-                    name: 'OGMS_ubuntu_slave3',
-                    hostport: '172.21.212.246',
-                    resource: {
-                        cpu: '2',
-                        memory: '345Mb',
-                        disk: '',
-                        maxMemory: ''
-                    },
-                    task: {
-                        total: 30,
-                        active: 1,
-                        complete: SparkCtrl.mockSpark(ins.time.start, Date.now(), 30, 0.5),
-                        failed: 0
-                    }
+                task: {
+                    total: Math.round(numTasks.total * 0.2),
+                    active: 1,
+                    complete: 0,
+                    failed: 0
+                }
+            },
+            {
+                id: '3',
+                name: 'OGMS_ubuntu_slave3',
+                hostport: '172.21.212.246',
+                resource: {
+                    cpu: (1 + (Math.random() * 0.5)).toFixed(1),
+                    memory: '345Mb',
+                    disk: '',
+                    maxMemory: ''
                 },
-            ];
+                task: {
+                    total: Math.round(numTasks.total * 0.3),
+                    active: 1,
+                    complete: 0,
+                    failed: 0
+                }
+            },
+        ];
 
-            if(completeNum > 0 && completeNum < num.total) {
-                //update db
-                const where = {
-                    _id: ObjectID(ins._id)
-                }
-                const update = {
-                    $set: {
-                        numTasks: num,
-                        server: server,
-                        status: 'RUNNING'
-                    }
-                }
-                const msg = await instanceDB.update(where, update);
-            }
-            if(completeNum >= num.total) {
-                isFinished = true;
-                //update db
-                const where = {
-                    _id: ObjectID(ins._id)
-                }
-                const update = {
-                    $set: {
-                        numTasks: num,
-                        server: server,
-                        status: 'FINISHED_SUCCEED'
-                    }
-                }
-                const msg = await instanceDB.update(where, update);
-            }
-
-            await setTimeoutPromise(2000);
+        //update db
+        const where = {
+            _id: ObjectID(ins._id)
         }
+        const update = {
+            $set: {
+                time: {
+                    ...ins.time,
+                    start: Date.now()
+                },
+                numTasks: numTasks,
+                server: server,
+                status: 'RUNNING'
+            }
+        }
+        const msg = await instanceDB.update(where, update);
+
+        // polling spark running progress
+        await updateInstanceProgress(insId);
+
     } catch (error) {
         console.log(`start instance error! msg:${error}`);
         return false;
+    }
+}
+
+async function updateInstanceProgress(insId) {
+    let isFinished = false; 
+    while(!isFinished) {
+        const ins = await getInstanceById(insId);
+        let totalCpu = 0;
+        for(item of ins.server) {
+            totalCpu += Number(item.resource.cpu);
+        }
+
+        if(ins.numTasks.completed >= 0 && ins.numTasks.completed < ins.numTasks.total) {
+            //update db
+            const where = {
+                _id: ObjectID(ins._id)
+            }
+            const newServer = ins.server.map( item => {
+                return {
+                    ...item,
+                    task: {
+                        ...item.task,
+                        completed: SparkCtrl.mockSpark(ins.time.start, Date.now(), item.task.total, item.resource.cpu),
+                    }
+                }
+            })
+            const update = {
+                $set: {
+                    'numTasks.completed': SparkCtrl.mockSpark(ins.time.start, Date.now(), ins.numTasks.total, totalCpu),
+                    server: newServer,
+                }
+            }
+            const msg = await instanceDB.update(where, update);
+        }
+        if(ins.numTasks.completed >= ins.numTasks.total) {
+            //update db
+            const where = {
+                _id: ObjectID(ins._id)
+            }
+            const newServer = ins.server.map( item => {
+                return {
+                    ...item,
+                    task: {
+                        ...item.task,
+                        completed: item.task.total,
+                    }
+                }
+            })
+            const update = {
+                $set: {
+                    'numTasks.completed': ins.numTasks.total,
+                    server: newServer,
+                    status: 'FINISHED_SUCCEED',
+                    'time.end': Date.now()
+                }
+            }
+            const msg = await instanceDB.update(where, update);
+            isFinished = true;
+        }
+
+        await setTimeoutPromise(2000);
     }
 }
 
