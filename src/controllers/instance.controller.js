@@ -267,13 +267,13 @@ async function updateInstanceProgress(insId) {
             const where = {
                 _id: ObjectID(ins._id)
             }
-            const newServer = ins.server.map( item => {
+            const newServer = ins.server.map(item => {
                 return {
                     ...item,
                     task: {
                         ...item.task,
                         completed: item.task.total,
-                    }
+                    }     
                 }
             })
             const update = {
@@ -283,9 +283,9 @@ async function updateInstanceProgress(insId) {
                     status: 'FINISHED_SUCCEED',
                     'time.end': Date.now()
                 }
-            }
+            } 
             const msg = await instanceDB.update(where, update);
-            isFinished = true;
+            isFinished = true; 
         }
 
         await setTimeoutPromise(2000);
