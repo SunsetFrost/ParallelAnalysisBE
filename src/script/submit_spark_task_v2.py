@@ -9,7 +9,6 @@ import sys
 import os
 import subprocess
 import shutil
-import datetime
 from pyspark.sql import SparkSession
 
 # 命令行参数
@@ -23,7 +22,7 @@ OUTPUT_DIR = '/home/jovyan/instance/' + INSTANCE_ID
 MODEL_PATH = '/home/jovyan/model/IBIS/IBIS.exe'
 
 # 运算的站点列表
-calcList = ['1', '2', '3','4', '5', '6', '7', '8', '9', '10']
+calcList = ['2', '3', '5']
 
 # 返回实际需要计算的站点RDD
 def filterCalcParamList(hdfsObj):
@@ -87,16 +86,43 @@ def invokeModel(Obj):
     sitePath = OUTPUT_DIR + '/' + index + '/site.csv'
     outputPath = OUTPUT_DIR + '/' + index + '/output.txt'
     paramPath = OUTPUT_DIR + '/' + index + '/param.txt'
-
-    devNull = open(os.devnull, 'w')
-    subprocess.call('wine ' + MODEL_PATH + ' -i=' + sitePath + ' -o=' + outputPath + ' -s=' + paramPath, shell=True, stdout=devNull)
+    subprocess.call('wine ' + MODEL_PATH + ' -i=' + sitePath + ' -o=' + outputPath + ' -s=' + paramPath, shell=True)
     return
 
 # 结果数据转化为RDD
 def outputFile2RDD(Obj):
-    baseDir = OUTPUT_DIR + '/' + Obj[0]
-    outputPath = baseDir + '/output.txt'
+    baseDir = OUTPUT_DIR + '/' + INSTANCE_ID + '/' + Obj[0]
+    outputPath = baseDir + '/param.txt'
 
+    outputContent = ''
+    with open(outputPath, 'r') as f:
+        outputContent = f.read()
+
+    return (Obj[0], outputContent)
+
+# 计算
+def calc(Obj):
+    # rdd2file
+    siteContent = Obj[1][0]
+    paramContent = Obj[1][1]
+
+    baseDir = OUTPUT_DIR + '/' + Obj[0]
+    os.makedirs(baseDir)
+
+    sitePath = baseDir + '/site.csv'
+    with open(sitePath, 'w') as f:
+        f.write(siteContent)
+
+    paramPath = baseDir + '/param.txt'
+    with open(paramPath, 'w') as f:
+        f.write(paramContent)
+
+    # invoke model
+    index = Obj[0]
+    outputPath = OUTPUT_DIR + '/' + index + '/output.txt'
+    subprocess.call('wine ' + MODEL_PATH + ' -i=' + sitePath + ' -o=' + outputPath + ' -s=' + paramPath)
+
+    # 结果数据转化为RDD
     outputContent = ''
     with open(outputPath, 'r') as f:
         outputContent = f.read()
@@ -110,10 +136,6 @@ def clearCache(Obj):
     return
 
 if __name__ == "__main__":
-    starttime = datetime.datetime.now()
-    print('\nstart calcutlate----------\n')
-    print(starttime)
-
     spark = SparkSession\
         .builder\
         .appName(INSTANCE_ID)\
@@ -136,20 +158,17 @@ if __name__ == "__main__":
     # join two rdd
     rddCalcInput = rddCalcSiteStandInput.join(rddCalcParamStandInput)
     #calculate
-    rddCalcInput.foreach(rdd2file)
-    rddCalcInput.foreach(invokeModel)
-    rddOutput = rddCalcInput.map(outputFile2RDD)
+    rddOutput = rddCalcInput.map(calc)
+
+    # rddCalcInput.foreach(rdd2file)
+    # rddCalcInput.foreach(invokeModel)
+    # rddOutput = rddCalcInput.map(outputFile2RDD)
 
     outputPath = HADOOP_OUTPUT_DIR + '/output'
     rddOutput.saveAsSequenceFile(outputPath)
 
     # rddOutput.foreach(clearCache)  出错  运行提前
 
-    endtime = datetime.datetime.now()
-
-    print('\ncalculate site index:')
-    print(rddOutput.keys().collect())
-    print('\ncalculate complete------------- \n')
-    print(endtime)
+    print(rddOutput.collect())
 
     spark.stop()

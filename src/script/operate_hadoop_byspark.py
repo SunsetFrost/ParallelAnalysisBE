@@ -7,9 +7,12 @@ from pyspark.sql import SparkSession
 
 # 命令行参数
 APPNAME = sys.argv[1]
-HADOOP_URL = sys.argv[2]  # hdfs://172.21.212.122:9000
-INPUT_DIR = sys.argv[3]   # /site/ibis/file/sites
-OUTPUT_DIR = sys.argv[4]  # /site/ibis/seqFile/10000
+HADOOP_URL = 'hdfs://10.36.0.2:9000'  # hdfs://172.21.212.122:9000
+INPUT_DIR = '/site/ibis/file/params'   # /site/ibis/file/sites
+OUTPUT_PATH = '/site/ibis/seqFile/10000_params'  # /site/ibis/seqFile/10000
+
+def getTargetSites(indexList):
+    return
 
 if __name__ == "__main__":
     spark = SparkSession\
@@ -18,11 +21,15 @@ if __name__ == "__main__":
         .getOrCreate()
 
     sc = spark.sparkContext
+
+    inputDir = HADOOP_URL + INPUT_DIR
+    outputDir = HADOOP_URL + OUTPUT_DIR
+
     rdd = sc.wholeTextFiles(inputDir)
-    # rdd.saveAsSequenceFile(outputFile)
+    rdd.saveAsSequenceFile(outputDir)
 
-    m = rdd.collectAsMap()
+    m = rdd.collect()
 
-    print(rdd)
-    # print(m[2])
+    print(m)
+
     spark.stop()

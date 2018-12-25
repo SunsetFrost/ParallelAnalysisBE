@@ -6,9 +6,9 @@ import sys
 from hdfs import *
 
 # 命令行参数
-HADOOP_URL = sys.argv[1]   # "http://172.21.212.122:50070"
-SRC_DIR = sys.argv[2]      # '/home/bowen/Parallel/data/IBIS/standard/params'
-TARGET_DIR = sys.argv[3]   # '/site/ibis/file/params/10'
+HADOOP_URL = 'http://10.36.0.2:50070'   # 'http://172.21.212.122:50070'
+SRC_DIR = '/home/bowen/Parallel/data/IBIS/standard/params'      # '/home/bowen/Parallel/data/IBIS/standard/params'
+TARGET_DIR = '/site/ibis/file/params'   # '/site/ibis/file/params/10'
 
 def mkdir(client, path):
     client.makedirs(path)
@@ -26,15 +26,23 @@ def deleteBySiteIndex(client, start, end):
         filename = str(i) + '.txt'
         client.delete(targetPath + '/' + filename)
 
-def createSeqFile(client, start, end):
-    # hdfs package not support
-    return
+def deleteDir(client):
+        client.delete('/site/ibis/seqFile/10_sites', True)
+
+def rename(client):
+        srcPath = '/site/ibis/seqFile/10000'
+        dstPath = '/site/ibis/seqFile/10000_sites'
+        client.rename(srcPath, dstPath)
 
 def main():
     client = Client(HADOOP_URL, root="/", session=False)
-    # mkdir(client, '/site/ibis/file/params/10')
-    uploadBySiteIndex(client, 1, 10)
+
+    mkdir(client, '/log')
+    # uploadBySiteIndex(client, 1, 10000)
     # deleteBySiteIndex(client, 1, 10)
+    # deleteDir(client)
+    # rename(client)
+
 
 if __name__ == "__main__":
     main()
