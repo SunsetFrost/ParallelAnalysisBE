@@ -1,0 +1,14 @@
+version: '3'
+services:
+  namenode:
+    image: uhopper/hadoop-namenode
+    hostname: namenode.weave.local
+    container_name: namenode
+    network_mode: weave
+    domainname: weave
+    dns: 172.17.0.1
+    dns_search: weave.local
+    volumes:
+      - /docker_volume/namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=TestHadoop
