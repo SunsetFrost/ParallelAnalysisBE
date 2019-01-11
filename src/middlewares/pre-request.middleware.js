@@ -1,8 +1,5 @@
-const bodyParser = require('body-parser');
+import bodyParser from 'body-parser';
 //const compression = require('compression');
-const _ = require('lodash');
-
-const setting = require('../setting');
 
 function preMid(app) {
     // 私钥
@@ -45,4 +42,4 @@ function preMid(app) {
     });
 }
 
-module.exports = preMid;
+export default preMid;
