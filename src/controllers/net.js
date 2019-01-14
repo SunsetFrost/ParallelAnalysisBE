@@ -1,43 +1,25 @@
 import NetModel from '../models/net'
 
 class Net {
-    async getNets(req, res, next) {
+    async getNets() {
         const nets = await NetModel.find({});
-        res.send({
-            status: 200,
-            data: nets
-        })
+        return nets;
     }
 
-    async getNetById(req, res, next) {
-        const _id = req.params.id;
-        const net = await NetModel.findById({_id});
-        res.send({
-            status: 200,
-            data: net
-        })
+    async getNetById(id) {
+        const net = await NetModel.findById({_id: id});
+        return net;
     }
 
-    async addNet(req, res, next) {
-        const newNet = req.body;
+    async addNet(newNet) {
         const data = await NetModel.create(newNet);
-        res.send({
-            status: 200,
-            success: '创建网络成功',
-            data: newNet
-         })
+        return data;
     }
 
-    async updateNet(req, res, next) {
-        const newNet = req.body;
-        const _id = newNet.id;
-        await NetModel.findOneAndUpdate({_id}, {$set: newNet});
-        res.send({
-            status: 200,
-            success: '更新网络成功',
-            data: newNet
-        })
+    async updateNet(id, newNet) {
+        const data = await NetModel.findOneAndUpdate({_id: id}, {$set: newNet});
+        return data;
     }
 }
 
-export default new Net()
+export default new Net();

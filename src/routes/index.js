@@ -6,6 +6,9 @@
 // const LogRouter = require('./log.route');
 
 import net from './net';
+import data from './data';
+import calc from './calc';
+import task from './task';
 
 // const router = new baseRouter();
 
@@ -30,4 +33,7 @@ import net from './net';
 
 export default app => {
     app.use('/net', net);
+    app.use('/data', data);
+    app.use('/calc', calc);
+    app.use('/task', task);
 }

@@ -72,24 +72,24 @@ const instance = {
     status: '' 
 }
 
-class InstanceDB extends MongooseBase {
-    constructor() {
-        const collName = 'Instance';
-        const schema = {
-            name: String,
-            modelCfg: mongoose.Schema.Types.Mixed,
-            parallCfg: mongoose.Schema.Types.Mixed,
-            time: mongoose.Schema.Types.Mixed,
-            numTasks: mongoose.Schema.Types.Mixed,
-            server: mongoose.Schema.Types.Mixed,
-            user: String,
-            status: String
-        }
+// class InstanceDB extends MongooseBase {
+//     constructor() {
+//         const collName = 'Instance';
+//         const schema = {
+//             name: String,
+//             modelCfg: mongoose.Schema.Types.Mixed,
+//             parallCfg: mongoose.Schema.Types.Mixed,
+//             time: mongoose.Schema.Types.Mixed,
+//             numTasks: mongoose.Schema.Types.Mixed,
+//             server: mongoose.Schema.Types.Mixed,
+//             user: String,
+//             status: String
+//         }
 
-        super(collName, schema);
-    }
-}
+//         super(collName, schema);
+//     }
+// }
 
-const instanceDB = new InstanceDB();
-module.exports.instanceDB = instanceDB;
-module.exports.init = instance;
+// const instanceDB = new InstanceDB();
+// module.exports.instanceDB = instanceDB;
+// module.exports.init = instance;
