@@ -1,4 +1,5 @@
-import bodyParser from 'body-parser';
+import bodyParser from "body-parser";
+import chalk from "chalk";
 //const compression = require('compression');
 
 function preMid(app) {
@@ -12,33 +13,32 @@ function preMid(app) {
     //app.use(bodyParser.urlencoded({ extended: true }));
 
     // all cross origin
-    app.all('*', (req, res, next) => {
-        const allowOrign = [
-            'http://localhost:9035',
-            'http://localhost:8000',
-        ];
-        if(allowOrign.includes(req.headers.origin)) {
-            res.header('Access-Control-Allow-Origin', req.headers.origin);
+    app.all("*", (req, res, next) => {
+        const allowOrign = ["http://localhost:9035", "http://localhost:8000"];
+        if (allowOrign.includes(req.headers.origin)) {
+            res.header("Access-Control-Allow-Origin", req.headers.origin);
             res.header(
-                'Access-Control-Allow-Headers',
-                'Content-Type,Content-Length, Authorization, Accept,X-Requested-With'
+                "Access-Control-Allow-Headers",
+                "Content-Type,Content-Length, Authorization, Accept,X-Requested-With"
             );
             res.header(
-                'Access-Control-Allow-Methods',
-                'PUT,POST,GET,DELETE,OPTIONS'
+                "Access-Control-Allow-Methods",
+                "PUT,POST,GET,DELETE,OPTIONS"
             );
-            res.header(
-                'Access-Control-Allow-Credentials',
-                'true'
-            )
+            res.header("Access-Control-Allow-Credentials", "true");
         }
 
-        if (req.method == 'OPTIONS') {
+        if (req.method == "OPTIONS") {
             // 预检请求直接返回
-            return res.send(200);
+            return res.sendStatus(200);
         } else {
             return next();
         }
+    });
+
+    app.use((req, res, next) => {
+        console.log(chalk.greenBright(`${req.method}  --  ${req.url}\n`));
+        next();
     });
 }
 

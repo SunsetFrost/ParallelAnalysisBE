@@ -1,23 +1,22 @@
-import express from 'express';
-// import http from 'http';
-import router  from './routes/index';
-import io from 'socket.io';
+import express from "express";
+import io from "socket.io";
+import chalk from "chalk";
+import expressAsyncErrors from "express-async-errors";
 
-import db from '../src/models/db';
-import preRouter from './middlewares/pre-request.middleware';
-import postRouter from './middlewares/post-response.middleware';
-import InstanceCtl from './controllers/instance.controller';
-import setting  from './setting';
-import chalk from 'chalk';
+import router from "./routes/index";
+import preRouter from "./middlewares/pre-request.middleware";
+import postRouter from "./middlewares/post-response.middleware";
+import setting from "./setting";
+import db from "./models/db";
 
 const app = express();
 // http.Server(app);
 // const socket = io(http);
 
-
 preRouter(app);
 router(app);
 postRouter(app);
+
 // io.on('connection', (socket) => {
 //     console.log('client connected');
 //     InstanceCtl.emitInstance(socket);
@@ -28,7 +27,5 @@ postRouter(app);
 // })
 
 app.listen(setting.port, () => {
-    console.log(
-        chalk.green(`\n server is running at ${setting.port} \n`)
-    );
+    console.log(chalk.green(`\nserver is running at ${setting.port} \n`));
 });
